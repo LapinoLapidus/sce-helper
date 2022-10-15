@@ -51,7 +51,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
     let owned_cards = Arc::new(Mutex::new(vec![]));
-    let mut sce_pages_to_fetch: Vec<String> = vec![];
+    let mut sce_pages_to_fetch = vec![];
 
     // Find description of duplicates.
     for dupe in dupes {
@@ -78,11 +78,12 @@ fn main() -> anyhow::Result<()> {
     let bar = Arc::new(Mutex::new(ProgressBar::new(sce_pages_to_fetch.len() as u64)));
     let chunks = sce_pages_to_fetch.chunks(*CHUNK_SIZE);
     let mut results = vec![];
+
+    // Split the requests up to different threads
     for chunk in chunks {
         let mut handles = vec![];
-
         for sce_page in chunk {
-            let a = format!("{}", sce_page);
+            let a = sce_page.clone();
             let pb = Arc::clone(&bar);
             let duped = Arc::clone(&owned_cards);
             let handle = thread::spawn(move || {
@@ -98,9 +99,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
     bar.lock().unwrap().finish();
-    for card in results {
-        println!("{:?}", card);
-    }
+    results.iter().for_each(|card| println!("{:?}", card));
 
     Ok(())
 }
@@ -112,7 +111,7 @@ fn fetch_duplicates(page: String, dupes_arc: Arc<Mutex<Vec<(String, String)>>>) 
     ))?;
     let lock = dupes_arc.lock().unwrap();
     let dupes = lock.clone();
-    drop(lock);
+
     let mut results: Vec<Card> = vec![];
     let document = Html::parse_document(&page_text);
 

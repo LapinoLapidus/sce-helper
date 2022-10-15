@@ -1,6 +1,6 @@
 pub mod card {
     use std::fmt::{Debug, Formatter};
-    use ansi_term::Colour::{Blue, Yellow, Green, Cyan, RGB, White, Red};
+    use ansi_term::Colour::{Blue, Yellow, RGB, White};
 
     pub struct Card {
         pub game_name: String,
